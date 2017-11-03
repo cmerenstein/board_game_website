@@ -1,0 +1,12 @@
+{% extends "sun_tzu/base.html" %}
+{% block body_block %}
+<div class="container">
+	<div class="jumbotron">
+	<h2>Create a new game</h1>
+		<form method="POST">
+		{{form.as_p}}
+		{% csrf_token %}
+		<input type="submit" class="btn btn-primary" value="Submit">
+	</div>
+</div>
+{% endblock %}

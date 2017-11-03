@@ -1,0 +1,33 @@
+{% extends "sun_tzu/base.html" %}
+{% load static %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/game.css' %}">
+{% endblock %}
+
+{% block body_block %}
+<div class="container" align = "center">
+	<h2>Game {{ game.game_id }}</h2>
+	
+	<div class="row" id="control_panel">
+		<h4>Control panel</h4>
+	</div>
+	<div class="row">
+		<div class="col-sm-4">
+			<h2>{{ game.player_one.user.username}}</h2>
+		</div>
+		<div class="col-sm-4">
+			{% for province in game.province_set.all %}
+			<div class="province">
+				<h3>{{province.name}}</h3>
+				<h4>{{province.round_one_points}} | {{province.round_two_points}} | {{province.round_two_points}}</h4>
+			</div>
+			{% endfor %}
+		</div>
+		<div class="col-sm-4">
+			<h2>{{ game.player_two.user.username}}</h2>
+		</div>
+	</div>
+	
+</div>
+
+{% endblock %}
