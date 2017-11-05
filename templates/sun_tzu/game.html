@@ -9,22 +9,50 @@
 	<h2>Game {{ game.game_id }}</h2>
 	
 	<div class="row" id="control_panel">
-		<h4>Control panel</h4>
+		<h4>Cards to play</h4>
+		{% if player_logged_in %}
+			<form method="POST">
+			{%csrf_token%}
+			{% for province in game.province_set.all %}
+				<label for="{{province.name}}-select">{{province.name}}</label>
+				<select name="{{province.name}}-select" id="{{province.name}}-select">
+					{% for card in player_object.hand %}
+					<option value="{{card.id}}">{{card.card_value}}</option>
+					{% endfor %}
+				</select>
+			{% endfor %}
+			<input type="submit" name="" value="Play Cards">
+			</form>
+		{% endif %}
+		{% if not valid %}
+			<p>Error: card cannot be played in multiple provinces</p>
+		{% endif %}
 	</div>
 	<div class="row">
-		<div class="col-sm-4">
-			<h2>{{ game.player_one.user.username}}</h2>
+		<div class="col-xs-4">
+			<h3>{{ game.player_one.user.username}}</h3>
+			<ol>
+				{% for card in player_one_obj.hand %}
+				<li>{{card.card_value}}</li>
+				{% endfor %}
+			</ol>
 		</div>
-		<div class="col-sm-4">
+		<div class="col-xs-4">
 			{% for province in game.province_set.all %}
 			<div class="province">
 				<h3>{{province.name}}</h3>
+				<h3>{{province.player_one_card}} | {{province.armies}} | {{province.player_two_card}}<h3>
 				<h4>{{province.round_one_points}} | {{province.round_two_points}} | {{province.round_two_points}}</h4>
 			</div>
 			{% endfor %}
 		</div>
-		<div class="col-sm-4">
-			<h2>{{ game.player_two.user.username}}</h2>
+		<div class="col-xs-4">
+			<h3>{{ game.player_two.user.username}}</h3>
+			<ol>
+				{% for card in player_two_obj.hand %}
+				<li>{{card.card_value}}</li>
+				{% endfor %}
+			</ol>
 		</div>
 	</div>
 	

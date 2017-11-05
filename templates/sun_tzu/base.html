@@ -13,7 +13,7 @@
 		<nav class='navbar navbar-default navbar-static-top'>
 			<div class="container">
 				<ul class=" nav navbar-nav ">
-				<li><a class="navbar-brand" href="{% url 'index' %}">Bootleg Boardgames</a></li>
+				<li><a class="navbar-brand" href="{% url 'index' %}">Boardgames</a></li>
 				<li><a class="navbar-link" href="{% url 'sun_tzu:register'%}">Register</a></li>
 				{% if user.is_authenticated %}
 				<li><a class='navbar-link' href="{% url 'logout' %}">Logout</a></li>
