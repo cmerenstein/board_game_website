@@ -47,7 +47,6 @@ def new_game(request):
 				for card in EXTRA_CARDS:
 					p.card_set.create(card_value = card, is_single_use=True, deck_position = deck_position)	
 					deck_position += 1
-				p.card_number = 10 ## to start the player takes 10 cards
 				p.save()
 			
 			game.save()
@@ -77,64 +76,99 @@ def game_view(request, game_id):
 	
 	context["player_logged_in"] = player_logged_in
 	player_one_obj = game.player_set.get(player_name=game.player_one.user.username)
+	
+	
+	if request.method == "POST":
+		print(request.POST)
+		if request.POST["button"] == "Play Cards" and player_object.phase != 2:
+			### Make sure that no card is played twice
+			valid = True
+			for key in request.POST.keys():
+				if "select" in key:
+					for key_two in request.POST.keys():
+						if request.POST[key_two] == request.POST[key]:
+							if key_two != key:
+								valid = False
+			context["valid"] = valid
+			
+			## check if player has already moved this turn
+			moved = False
+			if player_object.turns_taken == game.turn:
+				moved = True
+			
+			if valid and not moved:
+			
+				## play card to province
+				for province in game.province_set.all():
+					card = Card.objects.get(pk=request.POST[province.name+"-select"])
+					if player_one:
+						province.player_one_card = card.card_value
+					else:
+						province.player_two_card = card.card_value
+					province.save()
+					
+					## check if a player has played a 1
+					if card.card_value == "1":
+						player_object.played_one = True
+					
+					## if card is single-use, remove
+					## need to decriment card_number to show we removed a card
+					if card.is_single_use:
+						card.player.card_number -= 1
+						card.player.save()
+						card.delete()
+					
+				## update the turns the player has taken
+				## I really don't know why this doesn't work with just player_object
+				## Figure ths out eventually, it's frustrating
+				player_object.turns_taken += 1
+				player_object.phase = 1
+				player_object.save()
+				if player_one:
+					player_one_obj = player_object
+				else:
+					player_two_obj = player_object
+
+				print(player_object.id, player_one_obj.id, player_two_obj.id)
+				print(game.turn, player_one_obj.turns_taken, player_two_obj.turns_taken, player_object.turns_taken)
+				
+				## Check if both players have made their move
+				if player_two_obj.phase == 1 and player_one_obj.phase == 1:
+	
+					## add up the armies
+					for province in game.province_set.all():
+						province.add_armies()
+						province.save()
+					game.turn += 1
+					game.save()
+					
+					for player in [player_one_obj, player_two_obj, player_object]:
+						player.phase = 2
+						player.save()
+				
+		elif request.POST["button"] == "Pick Cards":		
+			player_object.phase = 0
+			player_object.save()
+
+			## give players new cards
+			for player in [player_one_obj, player_two_obj]:
+				
+				# if a player played a 1, they get to see 3 and keep 2
+				if player.played_one:
+					pass				
+			
+				# if not they see 2 and keep one
+				else:
+					pass
+				
+		print(game.turn, player_one_obj.turns_taken, player_two_obj.turns_taken, player_object.turns_taken)
+	# print(player_one_obj.phase, player_two_obj.phase, player_object.phase)
+		
 	context["player_one_obj"] = player_one_obj
 	player_two_obj = game.player_set.get(player_name=game.player_two.user.username)	
 	context["player_two_obj"] = player_two_obj
 	
-	if request.method == "POST":
-		
-		### Make sure that no card is played twice
-		valid = True
-		for key in request.POST.keys():
-			if "select" in key:
-				for key_two in request.POST.keys():
-					if request.POST[key_two] == request.POST[key]:
-						if key_two != key:
-							valid = False
-		context["valid"] = valid
-		
-		## check if player has already moved this turn
-		moved = False
-		if player_object.turns_taken == game.turn:
-			moved = True
-		
-		if valid and not moved:
-		
-			## play card to province
-			for province in game.province_set.all():
-				card = Card.objects.get(pk=request.POST[province.name+"-select"])
-				if player_one:
-					province.player_one_card = card.card_value
-				else:
-					province.player_two_card = card.card_value
-				province.save()
-				
-				## if card is single-use, remove
-				if card.is_single_use:
-					card.delete()
-				
-			## update the turns the player has taken	
-			if player_one:
-				player_one_obj.turns_taken += 1
-				player_one_obj.save()
-			else:
-				player_two_obj.turns_taken += 1
-				player_two_obj.save()
-
-			print(player_object.id, player_one_obj.id, player_two_obj.id)
-			print(game.turn, player_one_obj.turns_taken, player_two_obj.turns_taken, player_object.turns_taken)
-			
-			## Check if both players have made their move
-			if player_one_obj.turns_taken == game.turn and player_two_obj.turns_taken == game.turn:
-				## add up the armies
-				for province in game.province_set.all():
-					province.add_armies()
-					province.save()
-				game.turn += 1
-				game.save()
-				
-				
-		print(game.turn, player_one_obj.turns_taken, player_two_obj.turns_taken, player_object.turns_taken)	
+	
 	return render(request, 'sun_tzu/game.html', context=context)
 
 

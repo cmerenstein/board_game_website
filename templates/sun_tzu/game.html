@@ -1,5 +1,6 @@
 {% extends "sun_tzu/base.html" %}
 {% load static %}
+{% load sun_tzu_extras %}
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/game.css' %}">
 {% endblock %}
@@ -7,32 +8,47 @@
 {% block body_block %}
 <div class="container" align = "center">
 	<h2>Game {{ game.game_id }}</h2>
-	
-	<div class="row" id="control_panel">
-		<h4>Cards to play</h4>
-		{% if player_logged_in %}
-			<form method="POST">
-			{%csrf_token%}
-			{% for province in game.province_set.all %}
-				<label for="{{province.name}}-select">{{province.name}}</label>
-				<select name="{{province.name}}-select" id="{{province.name}}-select">
-					{% for card in player_object.hand %}
-					<option value="{{card.id}}">{{card.card_value}}</option>
-					{% endfor %}
-				</select>
-			{% endfor %}
-			<input type="submit" name="" value="Play Cards">
-			</form>
-		{% endif %}
-		{% if not valid %}
-			<p>Error: card cannot be played in multiple provinces</p>
-		{% endif %}
-	</div>
+		<div class="row" id="control_panel">
+			{% if player_object.can_move and player_logged_in %}
+			<h4>Cards to play</h4>
+				<form method="POST">
+				{%csrf_token%}
+				{% for province in game.province_set.all %}
+					<label for="{{province.name}}-select">{{province.name}}</label>
+					<select name="{{province.name}}-select" id="{{province.name}}-select">
+						{% for card in player_object.hand %}
+						<option value="{{card.id}}">{{card.card_value}}</option>
+						{% endfor %}
+					</select>
+				{% endfor %}
+				<input type="submit" name="button" value="Play Cards">
+				</form>
+				{% if not valid %}
+				<p>Error: card cannot be played in multiple provinces</p>
+				{% endif %}
+			
+			{% elif player_object.can_pick and player_logged_in %}
+				<h4>Next Cards</h4>
+					<form method="POST">
+						{%csrf_token%}
+						{% for card in player_object.next_cards %}
+							<label class="checkbox-inline"><input type="checkbox" name={{card.id}} value={{card.id}}>{{card.card_value}}</label>
+						{% endfor %}
+						<br><input type="submit" name="button" value="Pick Cards">
+					</form>
+				
+			{% else %}
+				<h4> Waiting for other player </h4>
+				<a class="btn btn-default" href=".">Refresh</a>
+			{% endif %}
+		
+		</div>
 	<div class="row">
 		<div class="col-xs-4">
 			<h3>{{ game.player_one.user.username}}</h3>
+			<h4>card_number: {{player_one_obj.card_number}}</h4>
 			<ol>
-				{% for card in player_one_obj.hand %}
+				{% for card in player_one_obj.see_cards %}
 				<li>{{card.card_value}}</li>
 				{% endfor %}
 			</ol>
@@ -48,8 +64,9 @@
 		</div>
 		<div class="col-xs-4">
 			<h3>{{ game.player_two.user.username}}</h3>
+			<h4>card_number: {{player_two_obj.card_number}}</h4>
 			<ol>
-				{% for card in player_two_obj.hand %}
+				{% for card in player_two_obj.see_cards %}
 				<li>{{card.card_value}}</li>
 				{% endfor %}
 			</ol>

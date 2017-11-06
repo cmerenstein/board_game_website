@@ -70,13 +70,32 @@ class Province(models.Model):
 		
 class Player(models.Model):
 	game = models.ForeignKey(Game, on_delete=models.CASCADE)
-	card_number = models.IntegerField(default=0) # Keeps track of how much of the deck has been taken
+	card_number = models.IntegerField(default=10) # Keeps track of how much of the deck has been taken
 	player_name = models.CharField(max_length = 256)
 	turns_taken = models.IntegerField(default=0)
+	played_one = models.BooleanField(default=False)
+	
+	# phase 0 = hasn't moved, 1 = moved, not picked, 2 = picked
+	phase = models.IntegerField(default=0)
 	
 	def hand(self):
 		# print(self.card_set.order_by("deck_position")[:self.card_number])
 		return self.card_set.order_by("deck_position")[:self.card_number]
+	
+	def see_cards(self):
+		return self.card_set.order_by("deck_position")
+	
+	def next_cards(self):
+		# return the new cards that are to be added to the player's hand
+		if self.played_one:
+			return self.card_set.order_by("deck_position")[self.card_number:self.card_number+3]
+		return self.card_set.order_by("deck_position")[self.card_number:self.card_number+2] 
+	
+	def can_move(self):
+		return self.phase == 0
+		
+	def can_pick(self):
+		return self.phase == 2
 	
 	def __str__(self):
 		return self.player_name

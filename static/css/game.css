@@ -3,3 +3,9 @@
 	background-color: #f7f4ed;
 	float: none;
 }
+
+.board {
+	padding-top: 10px;
+	background-color: #EDF8FF;
+	padding-bottom: 10px;
+}
