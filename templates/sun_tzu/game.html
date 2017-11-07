@@ -24,15 +24,17 @@
 				<input type="submit" name="button" value="Play Cards">
 				</form>
 				{% if not valid %}
-				<p>Error: card cannot be played in multiple provinces</p>
+					<p>A card cannot be played in multiple provinces.</p>
 				{% endif %}
-			
+				{% if sixes_error %}
+					<p>A 6 cannot be played in the same province twice in one game.</p>
+				{% endif %}			
 			{% elif player_object.can_pick and player_logged_in %}
 				<h4>Next Cards</h4>
 					<form method="POST">
 						{%csrf_token%}
 						{% for card in player_object.next_cards %}
-							<label class="checkbox-inline"><input type="checkbox" name={{card.id}} value={{card.id}}>{{card.card_value}}</label>
+							<label class="checkbox-inline"><input type="checkbox" name="{{card.id}}-select" value={{card.id}}>{{card.card_value}}</label>
 						{% endfor %}
 						<br><input type="submit" name="button" value="Pick Cards">
 					</form>
@@ -45,8 +47,10 @@
 		</div>
 	<div class="row">
 		<div class="col-xs-4">
-			<h3>{{ game.player_one.user.username}}</h3>
+			<h3>Player One</h3>
 			<h4>card_number: {{player_one_obj.card_number}}</h4>
+			<h4>phase: {{player_one_obj.phase}}</h4>
+
 			<ol>
 				{% for card in player_one_obj.see_cards %}
 				<li>{{card.card_value}}</li>
@@ -56,15 +60,44 @@
 		<div class="col-xs-4">
 			{% for province in game.province_set.all %}
 			<div class="province">
-				<h3>{{province.name}}</h3>
-				<h3>{{province.player_one_card}} | {{province.armies}} | {{province.player_two_card}}<h3>
-				<h4>{{province.round_one_points}} | {{province.round_two_points}} | {{province.round_two_points}}</h4>
+				<div class="row">
+					<h3>{{province.name}}</h3>
+				</div>
+				<div class="row">
+					<div class="col-xs-3">
+						<h3>{{province.player_one_card}}</h3>
+					</div>
+					<div class="col-xs-6">
+						<span class="armies"><strong>{{province.armies}}</strong></h3>
+					</div>
+					<div class="col-xs-3">				
+						<h3>{{province.player_two_card}}</h3>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-3">
+						{% if province.player_one_played_six %}
+							<h4>6</h4>
+						{% endif %}
+					</div>
+					<div class="col-xs-6">
+						<h4>{{province.round_one_points}} | {{province.round_two_points}} | {{province.round_two_points}}</h4>
+					</div>
+					<div class="col-xs-3">				
+						{% if province.player_two_played_six %}
+							<h4>6</h4>
+						{% endif %}	
+					</div>
+					
+				</div>				
 			</div>
 			{% endfor %}
 		</div>
 		<div class="col-xs-4">
-			<h3>{{ game.player_two.user.username}}</h3>
+			<h3>Player Two</h3>
 			<h4>card_number: {{player_two_obj.card_number}}</h4>
+			<h4>phase: {{player_two_obj.phase}}</h4>
+
 			<ol>
 				{% for card in player_two_obj.see_cards %}
 				<li>{{card.card_value}}</li>

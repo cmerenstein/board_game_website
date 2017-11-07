@@ -76,12 +76,13 @@ def game_view(request, game_id):
 	
 	context["player_logged_in"] = player_logged_in
 	player_one_obj = game.player_set.get(player_name=game.player_one.user.username)
-	
+	player_two_obj = game.player_set.get(player_name=game.player_two.user.username)	
+
 	
 	if request.method == "POST":
 		print(request.POST)
 		if request.POST["button"] == "Play Cards" and player_object.phase != 2:
-			### Make sure that no card is played twice
+			## Make sure that no card is played twice
 			valid = True
 			for key in request.POST.keys():
 				if "select" in key:
@@ -89,8 +90,21 @@ def game_view(request, game_id):
 						if request.POST[key_two] == request.POST[key]:
 							if key_two != key:
 								valid = False
+						
+			## and make sure no six is played where it shouldn't be
+			sixes_error = False
+			for province in game.province_set.all():
+				card = Card.objects.get(pk=request.POST[province.name+"-select"])
+				if card.card_value == "6":
+					if player_one and province.player_one_played_six:
+							valid = False
+							sixes_error = True
+					elif province.player_two_played_six:
+							valid = False
+							sixes_error = True
+							
 			context["valid"] = valid
-			
+			context["sixes_error"] = sixes_error
 			## check if player has already moved this turn
 			moved = False
 			if player_object.turns_taken == game.turn:
@@ -105,22 +119,29 @@ def game_view(request, game_id):
 						province.player_one_card = card.card_value
 					else:
 						province.player_two_card = card.card_value
-					province.save()
 					
 					## check if a player has played a 1
 					if card.card_value == "1":
+						print("WHAT IS REALLY going on")
 						player_object.played_one = True
+						
+					## only allowed to play a 6 on a given province once a game
+					if card.card_value == "6":
+						if player_one:
+							province.player_one_played_six = True
+						else:
+							province.player_two_played_six = True
+							
+					province.save()
 					
 					## if card is single-use, remove
 					## need to decriment card_number to show we removed a card
 					if card.is_single_use:
-						card.player.card_number -= 1
+						player_object.card_number -= 1
 						card.player.save()
 						card.delete()
 					
 				## update the turns the player has taken
-				## I really don't know why this doesn't work with just player_object
-				## Figure ths out eventually, it's frustrating
 				player_object.turns_taken += 1
 				player_object.phase = 1
 				player_object.save()
@@ -147,25 +168,44 @@ def game_view(request, game_id):
 						player.save()
 				
 		elif request.POST["button"] == "Pick Cards":		
-			player_object.phase = 0
-			player_object.save()
 
-			## give players new cards
-			for player in [player_one_obj, player_two_obj]:
-				
-				# if a player played a 1, they get to see 3 and keep 2
-				if player.played_one:
-					pass				
+			## give players new cards, first must check if selected right amount
+			new_cards = []
+			for key in request.POST.keys():
+				if "select" in key:
+					card = Card.objects.get(pk=request.POST[key])
+					new_cards.append(card)
+			print("new_cards", new_cards)
 			
-				# if not they see 2 and keep one
-				else:
-					pass
+			## must select 2/3 or 1/2
+			valid = False
+			if player_object.played_one:
+				valid = len(new_cards) == 2
+				if len(player_object.next_cards()) == 1:
+					valid = len(new_cards) == 1
+			else:
+				valid = len(new_cards) == 1
+				
+			if valid and player_object.phase == 2:
+				
+				## card that doesn't get picked gets sent to the back
+				card_options = player_object.next_cards()
+				for card in card_options:
+					if card not in new_cards:
+						print("card not pickd", card.card_value, card.id)
+						card.deck_position = 1 + len(player_object.see_cards())
+						card.save()
+				
+				## update player_object to reflect adding cards to the hand
+				player_object.card_number += len(new_cards)
+				player_object.phase = 0
+				player_object.save()
+				
 				
 		print(game.turn, player_one_obj.turns_taken, player_two_obj.turns_taken, player_object.turns_taken)
 	# print(player_one_obj.phase, player_two_obj.phase, player_object.phase)
 		
 	context["player_one_obj"] = player_one_obj
-	player_two_obj = game.player_set.get(player_name=game.player_two.user.username)	
 	context["player_two_obj"] = player_two_obj
 	
 	
