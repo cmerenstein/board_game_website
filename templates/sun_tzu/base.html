@@ -4,21 +4,25 @@
 		<meta charset="utf-8">
 		<title></title>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		{% load static %}
+		
+		<link rel="stylesheet" href="{% static 'css/base.css' %}">
+		
 		
 		 {% block extra_head %}
 		 {% endblock %}
-		
+
 	</head>
 	<body>
 		<nav class='navbar navbar-default navbar-static-top'>
 			<div class="container">
-				<ul class=" nav navbar-nav ">
-				<li><a class="navbar-brand" href="{% url 'index' %}">Sun Tzu</a></li>
-				<li><a class="navbar-link" href="{% url 'sun_tzu:register'%}">Register</a></li>
+				<ul class=" nav navbar-nav top">
+				<li class="nav-item" ><a class="navbar-brand" href="{% url 'index' %}">Sun Tzu</a></li>
+				<li class="nav-item"><a class="nav-link" href="{% url 'sun_tzu:register'%}">Register</a></li>
 				{% if user.is_authenticated %}
-				<li><a class='navbar-link' href="{% url 'logout' %}">Logout</a></li>
+				<li class="nav-item"><a class='nav-link' href="{% url 'logout' %}">Logout</a></li>
 				{% else %}
-				<li><a class='navbar-link' href="{% url 'sun_tzu:user_login'%}">Login</a></li>
+				<li class="nav-item"><a class='nav-link' href="{% url 'sun_tzu:user_login'%}">Login</a></li>
 				</ul>
 				{% endif %}
 			</div>

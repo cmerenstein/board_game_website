@@ -6,10 +6,13 @@
 {% endblock %}
 
 {% block body_block %}
-<div class="container" align = "center">
-	<h2>Game {{ game.game_id }}</h2>
+<div class="container" align = "center" id="main">
+	<h2>Game {{ game.game_id }} - Turn {{game.turn}}</h2>
+		<div class="col-sm-4"><h2 class="player_one">{{game.player_one.user.username}}</h2> </div>
+		<div class="col-sm-4"><h2>Score: <span class="{{game.score_color}}">{{game.score}}</span></h2> </div>
+		<div class="col-sm-4"><h2 class="player_two">{{game.player_two.user.username}}</h2></div>
 		<div class="row" id="control_panel">
-			{% if player_object.can_move and player_logged_in %}
+			{% if player_object.can_move and player_logged_in and not over%}
 			<h4>Cards to play</h4>
 				<form method="POST">
 				{%csrf_token%}
@@ -29,7 +32,7 @@
 				{% if sixes_error %}
 					<p>A 6 cannot be played in the same province twice in one game.</p>
 				{% endif %}			
-			{% elif player_object.can_pick and player_logged_in %}
+			{% elif player_object.can_pick and player_logged_in and not over %}
 				<h4>Next Cards</h4>
 					<form method="POST">
 						{%csrf_token%}
@@ -39,45 +42,36 @@
 						<br><input type="submit" name="button" value="Pick Cards">
 					</form>
 				
-			{% else %}
+			{% elif not over and player_logged_in %}
 				<h4> Waiting for other player </h4>
 				<a class="btn btn-default" href=".">Refresh</a>
+			{% elif over%}
+				<h4>Game Over. {{game.winner.user.username}} wins.</h4>
+				<a class="btn btn-default" href="{% url 'sun_tzu:new_game'%}">New Game</a>		
 			{% endif %}
 		
 		</div>
 	<div class="row">
-		<div class="col-xs-4">
-			<h3>Player One</h3>
-			<h4>card_number: {{player_one_obj.card_number}}</h4>
-			<h4>phase: {{player_one_obj.phase}}</h4>
-
-			<ol>
-				{% for card in player_one_obj.see_cards %}
-				<li>{{card.card_value}}</li>
-				{% endfor %}
-			</ol>
-		</div>
-		<div class="col-xs-4">
 			{% for province in game.province_set.all %}
-			<div class="province">
+			<div class="col-sm-5 province" id="{{province.name}}">
 				<div class="row">
 					<h3>{{province.name}}</h3>
 				</div>
 				<div class="row">
 					<div class="col-xs-3">
-						<h3>{{province.player_one_card}}</h3>
+						<h3><strong>{{province.player_one_last_card}}</strong></h3>
 					</div>
 					<div class="col-xs-6">
-						<span class="armies"><strong>{{province.armies}}</strong></h3>
+						<span class="armies {{province.control}}"><strong>{{province.abs_armies}}</strong></h3>
 					</div>
 					<div class="col-xs-3">				
-						<h3>{{province.player_two_card}}</h3>
+						<h3><strong>{{province.player_two_last_card}}</strong></h3>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-xs-3">
 						{% if province.player_one_played_six %}
-							<h4>6</h4>
+							<h4 class="six-token">6</h4>
 						{% endif %}
 					</div>
 					<div class="col-xs-6">
@@ -85,24 +79,13 @@
 					</div>
 					<div class="col-xs-3">				
 						{% if province.player_two_played_six %}
-							<h4>6</h4>
+							<h4 class="six-token">6</h4>
 						{% endif %}	
 					</div>
 					
-				</div>				
+				</div>
 			</div>
 			{% endfor %}
-		</div>
-		<div class="col-xs-4">
-			<h3>Player Two</h3>
-			<h4>card_number: {{player_two_obj.card_number}}</h4>
-			<h4>phase: {{player_two_obj.phase}}</h4>
-
-			<ol>
-				{% for card in player_two_obj.see_cards %}
-				<li>{{card.card_value}}</li>
-				{% endfor %}
-			</ol>
 		</div>
 	</div>
 	

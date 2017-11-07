@@ -5,6 +5,40 @@
 	padding: 2px;
 }
 
+.player_one{
+	color: #588ec4;
+}
+
+.player_two{
+	color: #b21414;
+}
+
+#Wu {
+	background-image: url('../bg_mountains.jpg');
+}
+
+#Han-Qi {
+	background-image: url('../green_rice_mountain.jpg');
+}
+
+#Jin-Yan {
+	background-image: url('../yellow_fields.jpg');
+}
+
+#Chu {
+	background-image: url('../reddesert.jpg');
+}
+
+#Qin {
+	background-image: url('../sailbaot.jpg');
+}
+
+@media (min-width: 767px) {
+	.province {
+		display: inline-block;
+	}
+}
+
 .armies {
 	display: block;
     height: 60px;
@@ -14,14 +48,42 @@
     -moz-border-radius: 30px; /* or 50% */
     border-radius: 30px; /* or 50% */
 
+	background: rgba(254, 255, 242, 0.5);
 	border: 1px solid grey;
     text-align: center;
     font-size: 2em;
 	margin: auto;
 }
 
-.board {
-	padding-top: 10px;
-	background-color: #EDF8FF;
-	padding-bottom: 10px;
+.six-token {
+	display: block;
+    height: 30px;
+    width: 30px;
+    line-height: 30px;
+
+    -moz-border-radius: 15px; /* or 50% */
+    border-radius: 15px; /* or 50% */
+
+	background: black;
+	color: white;
+	border: 1px solid grey;
+    text-align: center;
+	margin: auto;
+}
+
+
+.card {
+	background-color: #f7f4ed;
+	border: 1px solid grey;
+    text-align: center;
+	width: 30px;
+	height: 40px;
+	border-radius: 25%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#main {
+
 }

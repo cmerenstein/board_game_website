@@ -19,6 +19,7 @@ def new_game(request):
 	PROVINCES = ["Wu", "Han-Qi", "Jin-Yan", "Chu", "Qin"]
 	BASE_CARDS = ["1", "2", "3", "4", "5", "6"]
 	EXTRA_CARDS = ["+1", "+1", "+1", "-1", "-1", "-1", "P", "P", "P", "7", "8", "9", "10"]
+	POINTS_CARDS = [[1, 2, 4], [1, 3, 5], [1, 4, 3], [2, 3, 4], [2, 3, 2], [2, 5, 2], [3, 1, 5], [3, 2, 3], [4, 3, 2]]
 	
 	if request.method == "POST":
 		game_form = GameForm(data=request.POST)
@@ -27,10 +28,12 @@ def new_game(request):
 			game = game_form.save()
 			
 			### give provinces values
+			random.shuffle(POINTS_CARDS)
 			for province in PROVINCES: 
-				r_one = random.randint(1,5)
-				r_two = random.randint(1,5)
-				r_three = random.randint(1,5)
+				points_card = POINTS_CARDS.pop()
+				r_one = points_card[0]
+				r_two = points_card[1]
+				r_three = points_card[2]
 				game.province_set.create(name=province, round_one_points=r_one, round_two_points=r_two, round_three_points=r_three)
 			
 			### make player objects
@@ -97,11 +100,13 @@ def game_view(request, game_id):
 				card = Card.objects.get(pk=request.POST[province.name+"-select"])
 				if card.card_value == "6":
 					if player_one and province.player_one_played_six:
-							valid = False
-							sixes_error = True
-					elif province.player_two_played_six:
-							valid = False
-							sixes_error = True
+						valid = False
+						sixes_error = True
+						print(card, province)
+					elif not player_one and province.player_two_played_six:
+						valid = False
+						sixes_error = True
+						print(card, province)
 							
 			context["valid"] = valid
 			context["sixes_error"] = sixes_error
@@ -122,16 +127,8 @@ def game_view(request, game_id):
 					
 					## check if a player has played a 1
 					if card.card_value == "1":
-						print("WHAT IS REALLY going on")
 						player_object.played_one = True
-						
-					## only allowed to play a 6 on a given province once a game
-					if card.card_value == "6":
-						if player_one:
-							province.player_one_played_six = True
-						else:
-							province.player_two_played_six = True
-							
+													
 					province.save()
 					
 					## if card is single-use, remove
@@ -159,16 +156,67 @@ def game_view(request, game_id):
 					## add up the armies
 					for province in game.province_set.all():
 						province.add_armies()
+						province.player_one_last_card = province.player_one_card
+						province.player_two_last_card = province.player_two_card
+						
+						## only allowed to play a 6 on a given province once a game
+						if province.player_one_card == "6":
+							province.player_one_played_six = True
+						if province.player_two_card == "6":
+							province.player_two_played_six = True
+						
 						province.save()
+					
+					
+					if game.turn % 3 == 0:
+						## add up score
+						round_score = 0
+						round = game.turn / 3
+						for province in game.province_set.all():
+							armies = province.armies
+							if round == 1:
+								if armies > 0:
+									round_score += province.round_one_points
+								elif armies < 0:
+									round_score -= province.round_one_points
+							elif round == 2:
+								if armies > 0:
+									round_score += province.round_two_points
+								elif armies < 0:
+									round_score -= province.round_two_points
+							else:
+								if armies > 0:
+									round_score += province.round_two_points
+								elif armies < 0:
+									round_score -= province.round_two_points
+						game.score += round_score
+						
+						## determine if someone won
+						if game.score > 8:
+							game.winner = game.player_one
+							game.over = True
+						elif game.score < -8:
+							game.winner = game.player_two
+							game.over = True
+						elif game.turn == 9:
+							if game.score > 0:
+								game.winner = game.player_one
+							elif game.score < 0:
+								game.winner = game.player_two
+							game.over = True
+					
 					game.turn += 1
 					game.save()
 					
+					## update players so that they can pick cards
 					for player in [player_one_obj, player_two_obj, player_object]:
 						player.phase = 2
 						player.save()
 				
 		elif request.POST["button"] == "Pick Cards":		
 
+		
+		
 			## give players new cards, first must check if selected right amount
 			new_cards = []
 			for key in request.POST.keys():
@@ -185,7 +233,9 @@ def game_view(request, game_id):
 					valid = len(new_cards) == 1
 			else:
 				valid = len(new_cards) == 1
-				
+			if len(player_object.next_cards()) == 0:
+				valid = True
+			
 			if valid and player_object.phase == 2:
 				
 				## card that doesn't get picked gets sent to the back
@@ -207,6 +257,7 @@ def game_view(request, game_id):
 		
 	context["player_one_obj"] = player_one_obj
 	context["player_two_obj"] = player_two_obj
+	context["over"] = game.over
 	
 	
 	return render(request, 'sun_tzu/game.html', context=context)

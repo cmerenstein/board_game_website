@@ -11,13 +11,23 @@ class UserProfileInfo(models.Model):
 		
 
 class Game(models.Model):
-	game_id = models.IntegerField(unique=True, primary_key=True)
+	game_id = models.AutoField(unique=True, primary_key=True)
 	player_one = models.ForeignKey(UserProfileInfo, related_name="p1")
 	player_two = models.ForeignKey(UserProfileInfo, related_name="p2")
 	
 	turn = models.IntegerField(default=1)
 	score = models.IntegerField(default=0)
 	
+	winner = models.ForeignKey(UserProfileInfo, related_name="winner", blank=True, null=True)
+	over = models.BooleanField(default=False)
+	
+	def score_color(self):
+		if self.score > 0:
+			return "player_one"
+		if self.score < 0:
+			return "player_two"
+		return ""
+		
 	def __str__(self):
 		return str(self.game_id)
 	
@@ -36,12 +46,26 @@ class Province(models.Model):
 	player_one_card = models.CharField(max_length = 3, default = "")
 	player_two_card = models.CharField(max_length = 3, default = "")
 
+	player_one_last_card = models.CharField(max_length = 3, default = "")
+	player_two_last_card = models.CharField(max_length = 3, default = "")	
+	
 	player_one_played_six = models.BooleanField(default=False)
 	player_two_played_six = models.BooleanField(default=False)
 
 	
 	def __str__(self):
 		return self.name
+		
+	def abs_armies(self):
+		return abs(self.armies)
+		
+	def control(self):
+		if self.armies == 0:
+			return "neutral"
+		elif self.armies > 0:
+			return "player_one"
+		else:
+			return "player_two"
 		
 	def add_armies(self):
 	## this is gonna get ugly...
@@ -70,6 +94,13 @@ class Province(models.Model):
 			else:
 				self.armies += 1
 		
+		# both play +1 or -1
+		elif not p_one_is_number and not p_two_is_number:
+			if "+" in self.player_one_card and "-" in self.player_two_card:
+				self.armies += 1
+			elif "-" in self.player_one_card and "+" in self.player_two_card:
+				self.armies -= 1
+			## if both are + or both are -, nothing changes
 		return self.armies
 		
 class Player(models.Model):
