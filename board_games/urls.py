@@ -22,4 +22,5 @@ urlpatterns = [
 	url(r'^$', views.index, name='index'),
 	url(r'^sun_tzu/', include('sun_tzu.urls')), 
 	url(r'^logout/$', views.user_logout,name='logout'),
+	url(r'^my_games/', views.my_games, name='my_games'),
 ]

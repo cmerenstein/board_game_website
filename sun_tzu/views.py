@@ -14,6 +14,14 @@ def index(request):
 	
 	return render(request, 'sun_tzu/index.html', {})
 
+def my_games(request):
+
+	player = get_object_or_404(UserProfileInfo, user=request.user)
+	print(request.user, player)
+	gameset = player.p1.all() | player.p2.all()
+	print(gameset)
+	return render(request, 'sun_tzu/my_games.html', {"gameset":gameset})
+	
 @login_required
 def new_game(request):
 	PROVINCES = ["Wu", "Han-Qi", "Jin-Yan", "Chu", "Qin"]
