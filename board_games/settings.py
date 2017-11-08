@@ -25,7 +25,7 @@ SECRET_KEY = 'gakxt$i!kg@9d&@6w*=ynh2ja4h*+$frys647-)#6e1$w3h)jg'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cmerenstein.pythonanywhere.com']
+ALLOWED_HOSTS = ['cmerenstein.pythonanywhere.com', '127.0.0.1']
 
 
 # Application definition
