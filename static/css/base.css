@@ -1,3 +1,17 @@
 .top {
 	display: inline-flex;
 }
+
+@media only screen and (orientation: portrait) {
+    .top li{
+        font-size: 2.2em;
+    }
+    .navbar-brand{
+        font-size: 1.7em;
+    }
+
+    .jumbotron li{
+        font-size: 2em;
+
+    }
+}

@@ -25,7 +25,7 @@ SECRET_KEY = 'gakxt$i!kg@9d&@6w*=ynh2ja4h*+$frys647-)#6e1$w3h)jg'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['cmerenstein.pythonanywhere.com']
 
 
 # Application definition
@@ -82,11 +82,11 @@ DATABASES = {
 }
 
 PASSWORD_HASHERS = [
-	'django.contrib.auth.hashers.Argon2PasswordHasher', 
-	'django.contrib.auth.hashers.BCryptSHA256PasswordHasher', 
-	'django.contrib.auth.hashers.BCryptPasswordHasher', 
-	'django.contrib.auth.hashers.PBKDF2PasswordHasher', 'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher', 
-	
+	'django.contrib.auth.hashers.Argon2PasswordHasher',
+	'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+	'django.contrib.auth.hashers.BCryptPasswordHasher',
+	'django.contrib.auth.hashers.PBKDF2PasswordHasher', 'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+
 ]
 
 # Password validation
