@@ -21,6 +21,7 @@
 				<li class="nav-item"><a class="nav-link" href="{% url 'sun_tzu:register'%}">Register</a></li>
 				{% if user.is_authenticated %}
 				<li class="nav-item"><a class='nav-link' href="{% url 'logout' %}">Logout</a></li>
+				<li class="nav-item"><a class='nav-link' href="{% url 'my_games' %}">My Games</a></li>
 				{% else %}
 				<li class="nav-item"><a class='nav-link' href="{% url 'sun_tzu:user_login'%}">Login</a></li>
 				</ul>
