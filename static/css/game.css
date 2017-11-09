@@ -4,6 +4,14 @@
 
     }
 
+    .container{
+
+        width: 100%
+    }
+
+    h2 {
+        font-size: 3.5em;
+    }
 
 
     h3 {
@@ -13,6 +21,17 @@
 
     h4 {
         font-size: 2.5em;
+    }
+
+    p {
+
+        font-size: 1.5em;
+    }
+
+    label{
+        margin-left: 10px;
+        margin-right: 10px;
+        font-size: 2em;
     }
 
 }
@@ -34,7 +53,7 @@
 }
 
 #Wu {
-	background-image: url('../bg_mountains.jpg');
+	background-image: url('../mountains_wide.jpg');
 }
 
 #Han-Qi {
@@ -42,11 +61,11 @@
 }
 
 #Jin-Yan {
-	background-image: url('../yellow_fields.jpg');
+	background-image: url('../fields_yello.jpg');
 }
 
 #Chu {
-	background-image: url('../reddesert.jpg');
+	background-image: url('../red_desert_wide.jpg');
 }
 
 #Qin {
