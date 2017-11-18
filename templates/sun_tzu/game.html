@@ -14,7 +14,7 @@
 		<div class="row" id="control_panel">
 			{% if player_object.can_move and player_logged_in and not over%}
 			<h4>Cards to play</h4>
-				<form method="POST">
+				<form method="POST" id="cards">
 				{%csrf_token%}
 				{% for province in game.province_set.all %}
 					<label for="{{province.name}}-select">{{province.name}}</label>
@@ -24,11 +24,12 @@
 						{% endfor %}
 					</select>
 				{% endfor %}
-				<input type="submit" name="button" value="Play Cards">
+				<a class="button btn btn-default" id="play_cards">Play Cards</a>
 				</form>
-				{% if not valid %}
+				<p id="warning"></p>
+				<!-- {% if not valid %}
 					<p>A card cannot be played in multiple provinces.</p>
-				{% endif %}
+				{% endif %} -->
 				{% if sixes_error %}
 					<p>A 6 cannot be played in the same province twice in one game.</p>
 				{% endif %}
@@ -90,5 +91,8 @@
 	</div>
 
 </div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script src="{% static 'javascript/game.js' %}"></script>
 
 {% endblock %}

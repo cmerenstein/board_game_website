@@ -89,10 +89,11 @@ def game_view(request, game_id):
 	player_one_obj = game.player_set.get(player_name=game.player_one.user.username)
 	player_two_obj = game.player_set.get(player_name=game.player_two.user.username)	
 
+	print(request.POST)
 	
 	if request.method == "POST":
 		print(request.POST)
-		if request.POST["button"] == "Play Cards" and player_object.phase != 2:
+		if "Wu-select" in request.POST.keys() and player_object.phase != 2:
 			## Make sure that no card is played twice
 			valid = True
 			for key in request.POST.keys():
